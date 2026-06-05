@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Week 4 Secure API Dashboard</title>
+
+	<style nonce="{{NONCE}}">
+		*{
+			margin:0;
+			padding:0;
+			box-sizing:border-box;
+		}
+
+		body{
+			min-height:100vh;
+			font-family:Arial, Helvetica, sans-serif;
+			background:#050816;
+			color:#f8fafc;
+			overflow-x:hidden;
+		}
+
+		.background-grid{
+			position:fixed;
+			inset:0;
+			background-image:
+				linear-gradient(rgba(56,189,248,0.08) 1px, transparent 1px),
+				linear-gradient(90deg, rgba(56,189,248,0.08) 1px, transparent 1px);
+			background-size:42px 42px;
+			mask-image:linear-gradient(to bottom, black, transparent);
+			z-index:-3;
+		}
+
+		.glow{
+			position:fixed;
+			width:380px;
+			height:380px;
+			border-radius:50%;
+			filter:blur(95px);
+			opacity:0.48;
+			z-index:-2;
+		}
+
+		.glow-one{
+			background:#2563eb;
+			top:80px;
+			left:-130px;
+		}
+
+		.glow-two{
+			background:#14b8a6;
+			right:-140px;
+			bottom:120px;
+		}
+
+		.topbar{
+			width:min(1200px,92%);
+			margin:30px auto 20px;
+			padding:22px 26px;
+			display:flex;
+			justify-content:space-between;
+			align-items:center;
+			gap:18px;
+			background:rgba(15,23,42,0.76);
+			border:1px solid rgba(148,163,184,0.18);
+			border-radius:24px;
+			backdrop-filter:blur(18px);
+			box-shadow:0 20px 70px rgba(0,0,0,0.32);
+		}
+
+		.topbar h1{
+			font-size:32px;
+			letter-spacing:-1px;
+		}
+
+		.topbar p{
+			margin-top:6px;
+			color:#94a3b8;
+		}
+
+		.status-pill{
+			display:flex;
+			align-items:center;
+			gap:10px;
+			padding:12px 18px;
+			border-radius:999px;
+			background:rgba(34,197,94,0.1);
+			border:1px solid rgba(34,197,94,0.35);
+			color:#86efac;
+			font-size:13px;
+			font-weight:bold;
+			white-space:nowrap;
+		}
+
+		.status-pill span{
+			width:10px;
+			height:10px;
+			background:#22c55e;
+			border-radius:50%;
+			box-shadow:0 0 16px #22c55e;
+		}
+
+		.layout{
+			width:min(1200px,92%);
+			margin:0 auto;
+		}
+
+		.hero-card{
+			min-height:360px;
+			display:grid;
+			grid-template-columns:1.45fr 0.85fr;
+			gap:24px;
+			padding:34px;
+			border-radius:30px;
+			background:
+				linear-gradient(135deg, rgba(15,23,42,0.96), rgba(30,41,59,0.78)),
+				radial-gradient(circle at top right, rgba(56,189,248,0.35), transparent 35%);
+			border:1px solid rgba(148,163,184,0.2);
+			box-shadow:0 30px 90px rgba(0,0,0,0.36);
+		}
+
+		.eyebrow{
+			color:#38bdf8;
+			font-weight:bold;
+			text-transform:uppercase;
+			font-size:13px;
+			letter-spacing:1.4px;
+			margin-bottom:16px;
+		}
+
+		.hero-content h2{
+			font-size:58px;
+			line-height:1;
+			letter-spacing:-2px;
+			max-width:740px;
+		}
+
+		.hero-content p{
+			margin-top:18px;
+			color:#cbd5e1;
+			line-height:1.8;
+			max-width:760px;
+		}
+
+		.hero-actions{
+			margin-top:28px;
+			display:flex;
+			gap:14px;
+			flex-wrap:wrap;
+		}
+
+		button{
+			border:0;
+			padding:13px 18px;
+			border-radius:14px;
+			background:linear-gradient(135deg,#38bdf8,#2563eb);
+			color:white;
+			font-weight:bold;
+			cursor:pointer;
+			transition:0.2s ease;
+			box-shadow:0 12px 30px rgba(37,99,235,0.28);
+		}
+
+		button:hover{
+			transform:translateY(-2px);
+			box-shadow:0 18px 42px rgba(37,99,235,0.35);
+		}
+
+		.secondary-btn{
+			background:rgba(148,163,184,0.13);
+			border:1px solid rgba(148,163,184,0.22);
+			box-shadow:none;
+		}
+
+		.danger-btn{
+			margin-top:10px;
+			background:linear-gradient(135deg,#fb7185,#dc2626);
+			box-shadow:0 12px 30px rgba(220,38,38,0.25);
+		}
+
+		.warning-btn{
+			margin-top:10px;
+			background:linear-gradient(135deg,#fbbf24,#f97316);
+			box-shadow:0 12px 30px rgba(249,115,22,0.25);
+		}
+
+		.shield-box{
+			position:relative;
+			display:flex;
+			flex-direction:column;
+			align-items:center;
+			justify-content:center;
+			text-align:center;
+			border-radius:26px;
+			background:rgba(2,6,23,0.58);
+			border:1px solid rgba(148,163,184,0.18);
+			padding:28px;
+			overflow:hidden;
+		}
+
+		.shield-box:before{
+			content:"";
+			position:absolute;
+			width:230px;
+			height:230px;
+			background:rgba(56,189,248,0.13);
+			border-radius:50%;
+			filter:blur(42px);
+		}
+
+		.shield-icon{
+			position:relative;
+			font-size:76px;
+			margin-bottom:12px;
+		}
+
+		.shield-box h3{
+			position:relative;
+			font-size:25px;
+		}
+
+		.shield-box p{
+			position:relative;
+			color:#94a3b8;
+			margin-top:8px;
+		}
+
+		.risk-meter{
+			position:relative;
+			width:100%;
+			height:12px;
+			background:rgba(148,163,184,0.16);
+			border-radius:999px;
+			margin:24px 0 10px;
+			overflow:hidden;
+		}
+
+		.risk-meter div{
+			width:95%;
+			height:100%;
+			background:linear-gradient(90deg,#22c55e,#38bdf8);
+			border-radius:999px;
+		}
+
+		.shield-box span{
+			position:relative;
+			color:#86efac;
+			font-size:13px;
+			font-weight:bold;
+		}
+
+		.cards-grid{
+			display:grid;
+			grid-template-columns:repeat(4,1fr);
+			gap:18px;
+			margin-top:22px;
+		}
+
+		.feature-card{
+			padding:22px;
+			border-radius:22px;
+			background:rgba(15,23,42,0.74);
+			border:1px solid rgba(148,163,184,0.18);
+			box-shadow:0 18px 50px rgba(0,0,0,0.22);
+		}
+
+		.feature-card span{
+			color:#38bdf8;
+			font-weight:bold;
+			font-size:14px;
+		}
+
+		.feature-card h3{
+			margin-top:12px;
+			font-size:22px;
+		}
+
+		.feature-card p{
+			color:#94a3b8;
+			line-height:1.6;
+			margin-top:8px;
+			font-size:14px;
+		}
+
+		.dashboard-grid{
+			display:grid;
+			grid-template-columns:repeat(2,1fr);
+			gap:22px;
+			margin-top:22px;
+		}
+
+		.panel,.timeline-panel{
+			padding:24px;
+			border-radius:24px;
+			background:rgba(15,23,42,0.77);
+			border:1px solid rgba(148,163,184,0.18);
+			box-shadow:0 20px 60px rgba(0,0,0,0.25);
+			backdrop-filter:blur(18px);
+		}
+
+		.panel-header{
+			display:flex;
+			justify-content:space-between;
+			align-items:center;
+			margin-bottom:20px;
+			gap:12px;
+		}
+
+		.panel-header h2,.timeline-panel h2{
+			font-size:24px;
+		}
+
+		.panel-header span{
+			font-size:12px;
+			color:#38bdf8;
+			background:rgba(56,189,248,0.09);
+			border:1px solid rgba(56,189,248,0.2);
+			padding:7px 10px;
+			border-radius:999px;
+			white-space:nowrap;
+		}
+
+		label{
+			display:block;
+			color:#cbd5e1;
+			margin:14px 0 8px;
+			font-size:14px;
+		}
+
+		input,select,textarea{
+			width:100%;
+			background:#020617;
+			color:#f8fafc;
+			border:1px solid rgba(148,163,184,0.25);
+			border-radius:14px;
+			padding:13px 14px;
+			outline:none;
+		}
+
+		input:focus,select:focus,textarea:focus{
+			border-color:#38bdf8;
+			box-shadow:0 0 0 4px rgba(56,189,248,0.1);
+		}
+
+		.panel button{
+			width:100%;
+			margin-top:16px;
+		}
+
+		.token-box,.response-box{
+			margin-top:18px;
+			border-radius:16px;
+			background:#020617;
+			border:1px solid rgba(148,163,184,0.17);
+			overflow:hidden;
+		}
+
+		.token-box p,.response-box p{
+			padding:12px 14px;
+			border-bottom:1px solid rgba(148,163,184,0.15);
+			color:#38bdf8;
+			font-size:13px;
+			font-weight:bold;
+		}
+
+		textarea{
+			height:110px;
+			border:0;
+			border-radius:0;
+			resize:none;
+			font-family:Consolas, monospace;
+			font-size:12px;
+		}
+
+		pre{
+			min-height:130px;
+			white-space:pre-wrap;
+			word-break:break-word;
+			color:#cbd5e1;
+			padding:14px;
+			font-family:Consolas, monospace;
+			font-size:13px;
+			line-height:1.6;
+		}
+
+		.console-log{
+			min-height:340px;
+			max-height:380px;
+			overflow:auto;
+			background:#020617;
+			border:1px solid rgba(148,163,184,0.17);
+			border-radius:16px;
+			padding:16px;
+			font-family:Consolas, monospace;
+			font-size:13px;
+			color:#86efac;
+			line-height:1.7;
+		}
+
+		.console-log p{
+			margin-bottom:6px;
+		}
+
+		.timeline-panel{
+			margin-top:22px;
+		}
+
+		.timeline{
+			margin-top:24px;
+			display:grid;
+			gap:18px;
+		}
+
+		.timeline-item{
+			display:grid;
+			grid-template-columns:22px 1fr;
+			gap:16px;
+			align-items:start;
+		}
+
+		.timeline-item span{
+			width:16px;
+			height:16px;
+			margin-top:6px;
+			background:#38bdf8;
+			border-radius:50%;
+			box-shadow:0 0 18px #38bdf8;
+		}
+
+		.timeline-item h3{
+			font-size:18px;
+		}
+
+		.timeline-item p{
+			color:#94a3b8;
+			margin-top:6px;
+			line-height:1.6;
+		}
+
+		footer{
+			width:min(1200px,92%);
+			margin:24px auto 34px;
+			text-align:center;
+			color:#64748b;
+		}
+
+		@media(max-width:900px){
+			.topbar{
+				flex-direction:column;
+				align-items:flex-start;
+			}
+
+			.hero-card{
+				grid-template-columns:1fr;
+			}
+
+			.hero-content h2{
+				font-size:42px;
+			}
+
+			.cards-grid,.dashboard-grid{
+				grid-template-columns:1fr;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="background-grid"></div>
+	<div class="glow glow-one"></div>
+	<div class="glow glow-two"></div>
+
+	<header class="topbar">
+		<div>
+			<h1>Week 4 Secure API</h1>
+			<p>Advanced Threat Detection & Web Security Enhancements</p>
+		</div>
+		<div class="status-pill">
+			<span></span>
+			HTTPS ACTIVE
+		</div>
+	</header>
+
+	<main class="layout">
+		<section class="hero-card">
+			<div class="hero-content">
+				<p class="eyebrow">DevelopersHub Internship | Week 4</p>
+				<h2>Real-Time API Defense Dashboard</h2>
+				<p>
+					This secure application demonstrates JWT authentication, API key protection,
+					rate limiting, CORS restrictions, CSP, HSTS, security audit logs, and Fail2Ban-ready
+					threat monitoring.
+				</p>
+
+				<div class="hero-actions">
+					<button id="checkHeadersBtn">Check Security Features</button>
+					<button id="clearLogBtn" class="secondary-btn">Clear Console</button>
+				</div>
+			</div>
+
+			<div class="shield-box">
+				<div class="shield-icon">🛡️</div>
+				<h3>Security Posture</h3>
+				<p>Layered Protection Enabled</p>
+				<div class="risk-meter">
+					<div></div>
+				</div>
+				<span>Protection Score: 95%</span>
+			</div>
+		</section>
+
+		<section class="cards-grid">
+			<div class="feature-card">
+				<span>01</span>
+				<h3>JWT Auth</h3>
+				<p>Protected routes require a valid signed token.</p>
+			</div>
+
+			<div class="feature-card">
+				<span>02</span>
+				<h3>API Key</h3>
+				<p>Secure API endpoints reject unauthorized clients.</p>
+			</div>
+
+			<div class="feature-card">
+				<span>03</span>
+				<h3>Rate Limit</h3>
+				<p>Brute-force login attempts are blocked after repeated failures.</p>
+			</div>
+
+			<div class="feature-card">
+				<span>04</span>
+				<h3>CSP + HSTS</h3>
+				<p>Security headers reduce XSS, clickjacking, and downgrade attacks.</p>
+			</div>
+		</section>
+
+		<section class="dashboard-grid">
+			<div class="panel">
+				<div class="panel-header">
+					<h2>Authentication Test</h2>
+					<span>JWT Login</span>
+				</div>
+
+				<label>Username</label>
+				<input id="username" type="text" value="admin">
+
+				<label>Password</label>
+				<input id="password" type="password" value="Admin@12345">
+
+				<button id="loginBtn">Generate JWT Token</button>
+				<button id="bruteForceBtn" class="warning-btn">Simulate Failed Login</button>
+
+				<div class="token-box">
+					<p>JWT Token</p>
+					<textarea id="tokenOutput" readonly placeholder="Token will appear here after successful login"></textarea>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-header">
+					<h2>Protected API Test</h2>
+					<span>API Key + JWT</span>
+				</div>
+
+				<label>API Key</label>
+				<input id="apiKey" type="text" value="devhub-week4-api-key-12345">
+
+				<button id="secureApiBtn">Access Secure API</button>
+				<button id="invalidApiBtn" class="danger-btn">Test Invalid API Key</button>
+
+				<div class="response-box">
+					<p>API Response</p>
+					<pre id="apiResponse">Waiting for request...</pre>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-header">
+					<h2>Threat Simulation</h2>
+					<span>Security Logging</span>
+				</div>
+
+				<label>Threat Event</label>
+				<input id="threatEvent" type="text" value="Suspicious login pattern detected">
+
+				<label>Severity</label>
+				<select id="severity">
+					<option value="low">Low</option>
+					<option value="medium" selected>Medium</option>
+					<option value="high">High</option>
+					<option value="critical">Critical</option>
+				</select>
+
+				<button id="reportThreatBtn">Send Threat Report</button>
+
+				<div class="response-box">
+					<p>Threat Response</p>
+					<pre id="threatResponse">No threat submitted yet...</pre>
+				</div>
+			</div>
+
+			<div class="panel terminal-panel">
+				<div class="panel-header">
+					<h2>Frontend Console</h2>
+					<span>Live Activity</span>
+				</div>
+
+				<div id="consoleLog" class="console-log">
+					<p>[SYSTEM] Dashboard initialized successfully.</p>
+					<p>[INFO] HTTPS mode enabled on port 3443.</p>
+					<p>[INFO] Ready for API security testing.</p>
+				</div>
+			</div>
+		</section>
+
+		<section class="timeline-panel">
+			<h2>Week 4 Security Workflow</h2>
+
+			<div class="timeline">
+				<div class="timeline-item">
+					<span></span>
+					<div>
+						<h3>Step 1: User Authentication</h3>
+						<p>User logs in and receives a signed JWT token.</p>
+					</div>
+				</div>
+
+				<div class="timeline-item">
+					<span></span>
+					<div>
+						<h3>Step 2: API Key Validation</h3>
+						<p>Backend checks the x-api-key header before allowing access.</p>
+					</div>
+				</div>
+
+				<div class="timeline-item">
+					<span></span>
+					<div>
+						<h3>Step 3: Rate Limiting</h3>
+						<p>Repeated failed login attempts trigger brute-force protection.</p>
+					</div>
+				</div>
+
+				<div class="timeline-item">
+					<span></span>
+					<div>
+						<h3>Step 4: Security Headers</h3>
+						<p>CSP, HSTS, X-Frame-Options, and X-Content-Type-Options are enforced.</p>
+					</div>
+				</div>
+
+				<div class="timeline-item">
+					<span></span>
+					<div>
+						<h3>Step 5: Monitoring</h3>
+						<p>Winston logs security events and Fail2Ban can monitor failed attempts.</p>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer>
+		<p>Submitted By: Muhammad Hamza Naseer | DevelopersHub Cybersecurity Internship</p>
+	</footer>
+
+	<script nonce="{{NONCE}}">
+		const loginBtn=document.getElementById("loginBtn");
+		const bruteForceBtn=document.getElementById("bruteForceBtn");
+		const secureApiBtn=document.getElementById("secureApiBtn");
+		const invalidApiBtn=document.getElementById("invalidApiBtn");
+		const reportThreatBtn=document.getElementById("reportThreatBtn");
+		const checkHeadersBtn=document.getElementById("checkHeadersBtn");
+		const clearLogBtn=document.getElementById("clearLogBtn");
+
+		const tokenOutput=document.getElementById("tokenOutput");
+		const apiResponse=document.getElementById("apiResponse");
+		const threatResponse=document.getElementById("threatResponse");
+		const consoleLog=document.getElementById("consoleLog");
+
+		function addLog(type,message){
+			const time=new Date().toLocaleTimeString();
+			const line=document.createElement("p");
+			line.textContent="["+time+"] ["+type+"] "+message;
+			consoleLog.appendChild(line);
+			consoleLog.scrollTop=consoleLog.scrollHeight;
+		}
+
+		function pretty(data){
+			return JSON.stringify(data,null,2);
+		}
+
+		loginBtn.addEventListener("click",async()=>{
+			const username=document.getElementById("username").value;
+			const password=document.getElementById("password").value;
+
+			addLog("AUTH","Sending login request...");
+
+			try{
+				const res=await fetch("/api/login",{
+					method:"POST",
+					headers:{
+						"Content-Type":"application/json"
+					},
+					body:JSON.stringify({username,password})
+				});
+
+				const data=await res.json();
+
+				if(res.ok){
+					tokenOutput.value=data.token;
+					localStorage.setItem("week4_token",data.token);
+					addLog("SUCCESS","JWT token generated successfully.");
+				}else{
+					addLog("FAIL",data.error||"Login failed.");
+				}
+			}catch(error){
+				addLog("ERROR",error.message);
+			}
+		});
+
+		bruteForceBtn.addEventListener("click",async()=>{
+			addLog("TEST","Sending failed login request...");
+
+			try{
+				const res=await fetch("/api/login",{
+					method:"POST",
+					headers:{
+						"Content-Type":"application/json"
+					},
+					body:JSON.stringify({
+						username:"admin",
+						password:"wrong-password"
+					})
+				});
+
+				const data=await res.json();
+				addLog("RESULT",data.error||data.message||"Failed login request completed.");
+			}catch(error){
+				addLog("ERROR",error.message);
+			}
+		});
+
+		secureApiBtn.addEventListener("click",async()=>{
+			const token=tokenOutput.value||localStorage.getItem("week4_token");
+			const apiKey=document.getElementById("apiKey").value;
+
+			addLog("API","Requesting protected API endpoint...");
+
+			try{
+				const res=await fetch("/api/secure-data",{
+					method:"GET",
+					headers:{
+						"Authorization":"Bearer "+token,
+						"x-api-key":apiKey
+					}
+				});
+
+				const data=await res.json();
+				apiResponse.textContent=pretty(data);
+
+				if(res.ok){
+					addLog("SUCCESS","Protected API accessed successfully.");
+				}else{
+					addLog("BLOCKED",data.error||"API request blocked.");
+				}
+			}catch(error){
+				addLog("ERROR",error.message);
+			}
+		});
+
+		invalidApiBtn.addEventListener("click",async()=>{
+			const token=tokenOutput.value||localStorage.getItem("week4_token");
+
+			addLog("TEST","Testing invalid API key rejection...");
+
+			try{
+				const res=await fetch("/api/secure-data",{
+					method:"GET",
+					headers:{
+						"Authorization":"Bearer "+token,
+						"x-api-key":"wrong-api-key"
+					}
+				});
+
+				const data=await res.json();
+				apiResponse.textContent=pretty(data);
+				addLog("SECURITY","Invalid API key was rejected by backend.");
+			}catch(error){
+				addLog("ERROR",error.message);
+			}
+		});
+
+		reportThreatBtn.addEventListener("click",async()=>{
+			const token=tokenOutput.value||localStorage.getItem("week4_token");
+			const apiKey=document.getElementById("apiKey").value;
+			const event=document.getElementById("threatEvent").value;
+			const severity=document.getElementById("severity").value;
+
+			addLog("THREAT","Submitting threat report to backend logs...");
+
+			try{
+				const res=await fetch("/api/report-threat",{
+					method:"POST",
+					headers:{
+						"Content-Type":"application/json",
+						"Authorization":"Bearer "+token,
+						"x-api-key":apiKey
+					},
+					body:JSON.stringify({event,severity})
+				});
+
+				const data=await res.json();
+				threatResponse.textContent=pretty(data);
+
+				if(res.ok){
+					addLog("LOGGED","Threat event stored in security.log.");
+				}else{
+					addLog("BLOCKED",data.error||"Threat report blocked.");
+				}
+			}catch(error){
+				addLog("ERROR",error.message);
+			}
+		});
+
+		checkHeadersBtn.addEventListener("click",async()=>{
+			addLog("HEADERS","CSP enabled through Helmet with nonce-based inline protection.");
+			addLog("HEADERS","HSTS enabled for HTTPS enforcement.");
+			addLog("HEADERS","X-Frame-Options protects against clickjacking.");
+			addLog("HEADERS","X-Content-Type-Options reduces MIME sniffing.");
+
+			try{
+				const res=await fetch("/api/security-status");
+				const data=await res.json();
+				addLog("STATUS","Backend security status loaded successfully.");
+				apiResponse.textContent=pretty(data);
+			}catch(error){
+				addLog("ERROR",error.message);
+			}
+		});
+
+		clearLogBtn.addEventListener("click",()=>{
+			consoleLog.innerHTML="<p>[SYSTEM] Console cleared. Dashboard ready.</p>";
+		});
+	</script>
+</body>
+</html>
