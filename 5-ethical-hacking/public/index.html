@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Week 5 Ethical Hacking Lab</title>
+
+	<style nonce="{{NONCE}}">
+		*{
+			margin:0;
+			padding:0;
+			box-sizing:border-box;
+		}
+
+		body{
+			min-height:100vh;
+			font-family:Arial, Helvetica, sans-serif;
+			background:#060914;
+			color:#f8fafc;
+			overflow-x:hidden;
+		}
+
+		.grid-bg{
+			position:fixed;
+			inset:0;
+			background-image:
+				linear-gradient(rgba(34,197,94,0.08) 1px, transparent 1px),
+				linear-gradient(90deg, rgba(34,197,94,0.08) 1px, transparent 1px);
+			background-size:42px 42px;
+			z-index:-3;
+			mask-image:linear-gradient(to bottom, black, transparent);
+		}
+
+		.glow{
+			position:fixed;
+			width:390px;
+			height:390px;
+			border-radius:50%;
+			filter:blur(95px);
+			opacity:0.45;
+			z-index:-2;
+		}
+
+		.glow-one{
+			background:#16a34a;
+			top:80px;
+			left:-120px;
+		}
+
+		.glow-two{
+			background:#2563eb;
+			right:-130px;
+			bottom:90px;
+		}
+
+		.topbar{
+			width:min(1200px,92%);
+			margin:30px auto 22px;
+			padding:24px 28px;
+			border-radius:24px;
+			background:rgba(15,23,42,0.78);
+			border:1px solid rgba(148,163,184,0.18);
+			display:flex;
+			justify-content:space-between;
+			gap:20px;
+			align-items:center;
+			box-shadow:0 20px 70px rgba(0,0,0,0.35);
+			backdrop-filter:blur(18px);
+		}
+
+		.topbar h1{
+			font-size:34px;
+			letter-spacing:-1px;
+		}
+
+		.topbar p{
+			color:#94a3b8;
+			margin-top:6px;
+		}
+
+		.badge{
+			padding:12px 18px;
+			border-radius:999px;
+			background:rgba(34,197,94,0.12);
+			border:1px solid rgba(34,197,94,0.35);
+			color:#86efac;
+			font-weight:bold;
+			font-size:13px;
+			white-space:nowrap;
+		}
+
+		.layout{
+			width:min(1200px,92%);
+			margin:0 auto;
+		}
+
+		.hero{
+			padding:34px;
+			border-radius:30px;
+			background:
+				linear-gradient(135deg, rgba(15,23,42,0.96), rgba(30,41,59,0.78)),
+				radial-gradient(circle at top right, rgba(34,197,94,0.28), transparent 35%);
+			border:1px solid rgba(148,163,184,0.2);
+			display:grid;
+			grid-template-columns:1.4fr 0.8fr;
+			gap:24px;
+			box-shadow:0 30px 90px rgba(0,0,0,0.35);
+		}
+
+		.eyebrow{
+			color:#86efac;
+			font-size:13px;
+			font-weight:bold;
+			letter-spacing:1.4px;
+			text-transform:uppercase;
+			margin-bottom:14px;
+		}
+
+		.hero h2{
+			font-size:56px;
+			line-height:1;
+			letter-spacing:-2px;
+		}
+
+		.hero p{
+			color:#cbd5e1;
+			line-height:1.8;
+			margin-top:18px;
+			max-width:760px;
+		}
+
+		.stat-box{
+			border-radius:26px;
+			background:rgba(2,6,23,0.55);
+			border:1px solid rgba(148,163,184,0.18);
+			padding:28px;
+			display:grid;
+			gap:16px;
+		}
+
+		.stat{
+			padding:16px;
+			border-radius:18px;
+			background:rgba(15,23,42,0.8);
+			border:1px solid rgba(148,163,184,0.13);
+		}
+
+		.stat span{
+			color:#86efac;
+			font-size:13px;
+			font-weight:bold;
+		}
+
+		.stat h3{
+			margin-top:8px;
+			font-size:24px;
+		}
+
+		.cards{
+			display:grid;
+			grid-template-columns:repeat(4,1fr);
+			gap:18px;
+			margin-top:22px;
+		}
+
+		.card,.panel,.terminal-panel,.doc-panel{
+			background:rgba(15,23,42,0.78);
+			border:1px solid rgba(148,163,184,0.18);
+			border-radius:24px;
+			box-shadow:0 20px 60px rgba(0,0,0,0.25);
+			backdrop-filter:blur(18px);
+		}
+
+		.card{
+			padding:22px;
+		}
+
+		.card span{
+			color:#86efac;
+			font-weight:bold;
+		}
+
+		.card h3{
+			font-size:22px;
+			margin-top:12px;
+		}
+
+		.card p{
+			color:#94a3b8;
+			line-height:1.6;
+			margin-top:8px;
+			font-size:14px;
+		}
+
+		.dashboard{
+			display:grid;
+			grid-template-columns:repeat(2,1fr);
+			gap:22px;
+			margin-top:22px;
+		}
+
+		.panel,.terminal-panel,.doc-panel{
+			padding:24px;
+		}
+
+		.panel-header{
+			display:flex;
+			justify-content:space-between;
+			align-items:center;
+			gap:12px;
+			margin-bottom:20px;
+		}
+
+		.panel-header h2{
+			font-size:24px;
+		}
+
+		.panel-header span{
+			font-size:12px;
+			color:#86efac;
+			padding:7px 10px;
+			border-radius:999px;
+			background:rgba(34,197,94,0.09);
+			border:1px solid rgba(34,197,94,0.2);
+			white-space:nowrap;
+		}
+
+		label{
+			display:block;
+			color:#cbd5e1;
+			margin:14px 0 8px;
+			font-size:14px;
+		}
+
+		input{
+			width:100%;
+			padding:13px 14px;
+			border-radius:14px;
+			background:#020617;
+			color:#f8fafc;
+			border:1px solid rgba(148,163,184,0.25);
+			outline:none;
+		}
+
+		input:focus{
+			border-color:#86efac;
+			box-shadow:0 0 0 4px rgba(34,197,94,0.1);
+		}
+
+		button{
+			width:100%;
+			margin-top:14px;
+			padding:13px 18px;
+			border:0;
+			border-radius:14px;
+			background:linear-gradient(135deg,#22c55e,#16a34a);
+			color:white;
+			font-weight:bold;
+			cursor:pointer;
+			transition:0.2s ease;
+			box-shadow:0 12px 30px rgba(22,163,74,0.25);
+		}
+
+		button:hover{
+			transform:translateY(-2px);
+			box-shadow:0 18px 42px rgba(22,163,74,0.35);
+		}
+
+		.danger{
+			background:linear-gradient(135deg,#fb7185,#dc2626);
+			box-shadow:0 12px 30px rgba(220,38,38,0.25);
+		}
+
+		.blue{
+			background:linear-gradient(135deg,#38bdf8,#2563eb);
+			box-shadow:0 12px 30px rgba(37,99,235,0.25);
+		}
+
+		.response{
+			margin-top:18px;
+			border-radius:16px;
+			overflow:hidden;
+			background:#020617;
+			border:1px solid rgba(148,163,184,0.17);
+		}
+
+		.response p{
+			padding:12px 14px;
+			color:#86efac;
+			border-bottom:1px solid rgba(148,163,184,0.15);
+			font-weight:bold;
+			font-size:13px;
+		}
+
+		pre{
+			min-height:160px;
+			padding:14px;
+			color:#cbd5e1;
+			white-space:pre-wrap;
+			word-break:break-word;
+			font-family:Consolas, monospace;
+			font-size:13px;
+			line-height:1.6;
+		}
+
+		.console{
+			height:360px;
+			overflow:auto;
+			background:#020617;
+			border:1px solid rgba(148,163,184,0.17);
+			border-radius:16px;
+			padding:16px;
+			font-family:Consolas, monospace;
+			color:#86efac;
+			font-size:13px;
+			line-height:1.7;
+		}
+
+		.console p{
+			margin-bottom:6px;
+		}
+
+		.doc-panel{
+			margin-top:22px;
+		}
+
+		.doc-panel h2{
+			font-size:24px;
+			margin-bottom:16px;
+		}
+
+		.doc-grid{
+			display:grid;
+			grid-template-columns:repeat(3,1fr);
+			gap:16px;
+		}
+
+		.doc-item{
+			padding:18px;
+			border-radius:18px;
+			background:#020617;
+			border:1px solid rgba(148,163,184,0.14);
+		}
+
+		.doc-item h3{
+			color:#86efac;
+			font-size:17px;
+		}
+
+		.doc-item p{
+			margin-top:8px;
+			color:#94a3b8;
+			line-height:1.6;
+			font-size:14px;
+		}
+
+		footer{
+			width:min(1200px,92%);
+			text-align:center;
+			color:#64748b;
+			margin:26px auto 34px;
+		}
+
+		@media(max-width:900px){
+			.topbar,.hero{
+				grid-template-columns:1fr;
+				flex-direction:column;
+				align-items:flex-start;
+			}
+
+			.hero h2{
+				font-size:42px;
+			}
+
+			.cards,.dashboard,.doc-grid{
+				grid-template-columns:1fr;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="grid-bg"></div>
+	<div class="glow glow-one"></div>
+	<div class="glow glow-two"></div>
+
+	<header class="topbar">
+		<div>
+			<h1>Week 5 Ethical Hacking Lab</h1>
+			<p>SQL Injection Testing, SQLMap, Prepared Statements, CSRF Protection</p>
+		</div>
+		<div class="badge">LOCAL TEST ENVIRONMENT</div>
+	</header>
+
+	<main class="layout">
+		<section class="hero">
+			<div>
+				<p class="eyebrow">DevelopersHub Internship | Week 5</p>
+				<h2>Exploit, Verify, Fix</h2>
+				<p>
+					This lab demonstrates ethical hacking in a controlled local environment.
+					It includes an intentionally vulnerable SQL injection endpoint, a secure prepared
+					statement endpoint, a vulnerable CSRF route, and a protected CSRF route using token validation.
+				</p>
+			</div>
+
+			<div class="stat-box">
+				<div class="stat">
+					<span>ATTACK VECTOR</span>
+					<h3>SQL Injection</h3>
+				</div>
+				<div class="stat">
+					<span>TEST TOOL</span>
+					<h3>SQLMap + Burp</h3>
+				</div>
+				<div class="stat">
+					<span>SECURITY FIX</span>
+					<h3>Prepared Statements + CSRF Token</h3>
+				</div>
+			</div>
+		</section>
+
+		<section class="cards">
+			<div class="card">
+				<span>01</span>
+				<h3>Recon</h3>
+				<p>Identify routes, framework, database, and test endpoints.</p>
+			</div>
+
+			<div class="card">
+				<span>02</span>
+				<h3>Exploit</h3>
+				<p>Use manual payloads and SQLMap against the vulnerable endpoint.</p>
+			</div>
+
+			<div class="card">
+				<span>03</span>
+				<h3>Fix</h3>
+				<p>Use input validation and prepared statements to stop SQLi.</p>
+			</div>
+
+			<div class="card">
+				<span>04</span>
+				<h3>Protect</h3>
+				<p>Use CSRF tokens to block forged state-changing requests.</p>
+			</div>
+		</section>
+
+		<section class="dashboard">
+			<div class="panel">
+				<div class="panel-header">
+					<h2>SQL Injection Test</h2>
+					<span>Vulnerable vs Secure</span>
+				</div>
+
+				<label>User ID / Payload</label>
+				<input id="userIdInput" type="text" value="1 OR 1=1">
+
+				<button id="vulnerableSqlBtn" class="danger">Test Vulnerable SQLi Endpoint</button>
+				<button id="secureSqlBtn">Test Secure Prepared Statement Endpoint</button>
+
+				<div class="response">
+					<p>SQL Test Response</p>
+					<pre id="sqlResponse">Waiting for SQL test...</pre>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-header">
+					<h2>CSRF Test</h2>
+					<span>Token Protection</span>
+				</div>
+
+				<label>New Email</label>
+				<input id="emailInput" type="text" value="changed@student.local">
+
+				<button id="vulnerableCsrfBtn" class="danger">Change Email Without CSRF</button>
+				<button id="getTokenBtn" class="blue">Get CSRF Token</button>
+				<button id="secureCsrfBtn">Change Email With CSRF Token</button>
+
+				<div class="response">
+					<p>CSRF Test Response</p>
+					<pre id="csrfResponse">Waiting for CSRF test...</pre>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-header">
+					<h2>Recon Panel</h2>
+					<span>Endpoint Discovery</span>
+				</div>
+
+				<button id="reconBtn" class="blue">Run Recon Request</button>
+				<button id="profileBtn">View Session Profile</button>
+
+				<div class="response">
+					<p>Recon/Profile Response</p>
+					<pre id="reconResponse">Waiting for recon...</pre>
+				</div>
+			</div>
+
+			<div class="terminal-panel">
+				<div class="panel-header">
+					<h2>Activity Console</h2>
+					<span>Live Lab Log</span>
+				</div>
+
+				<div id="consoleLog" class="console">
+					<p>[SYSTEM] Week 5 ethical hacking dashboard loaded.</p>
+					<p>[INFO] Use only local endpoints for testing.</p>
+					<p>[INFO] Ready for SQLi and CSRF testing.</p>
+				</div>
+			</div>
+		</section>
+
+		<section class="doc-panel">
+			<h2>Testing Workflow</h2>
+
+			<div class="doc-grid">
+				<div class="doc-item">
+					<h3>Manual SQLi</h3>
+					<p>Send payload 1 OR 1=1 to the vulnerable endpoint and observe multiple records.</p>
+				</div>
+
+				<div class="doc-item">
+					<h3>SQLMap</h3>
+					<p>Run SQLMap against /vulnerable/user?id=1 to identify injection automatically.</p>
+				</div>
+
+				<div class="doc-item">
+					<h3>CSRF</h3>
+					<p>Remove CSRF token in Burp Repeater and confirm that the secure route blocks the request.</p>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer>
+		<p>Submitted By: Muhammad Hamza Naseer | DevelopersHub Cybersecurity Internship</p>
+	</footer>
+
+	<script nonce="{{NONCE}}">
+		let csrfToken="";
+
+		const sqlResponse=document.getElementById("sqlResponse");
+		const csrfResponse=document.getElementById("csrfResponse");
+		const reconResponse=document.getElementById("reconResponse");
+		const consoleLog=document.getElementById("consoleLog");
+
+		function pretty(data){
+			return JSON.stringify(data,null,2);
+		}
+
+		function log(type,message){
+			const time=new Date().toLocaleTimeString();
+			const line=document.createElement("p");
+			line.textContent="["+time+"] ["+type+"] "+message;
+			consoleLog.appendChild(line);
+			consoleLog.scrollTop=consoleLog.scrollHeight;
+		}
+
+		document.getElementById("vulnerableSqlBtn").addEventListener("click",async()=>{
+			const id=document.getElementById("userIdInput").value;
+			log("SQLi","Testing vulnerable endpoint...");
+
+			try{
+				const res=await fetch("/vulnerable/user?id="+encodeURIComponent(id));
+				const data=await res.json();
+				sqlResponse.textContent=pretty(data);
+				log("RESULT","Vulnerable SQL endpoint returned response.");
+			}catch(error){
+				log("ERROR",error.message);
+			}
+		});
+
+		document.getElementById("secureSqlBtn").addEventListener("click",async()=>{
+			const id=document.getElementById("userIdInput").value;
+			log("FIX","Testing secure prepared statement endpoint...");
+
+			try{
+				const res=await fetch("/secure/user?id="+encodeURIComponent(id));
+				const data=await res.json();
+				sqlResponse.textContent=pretty(data);
+				log("RESULT","Secure SQL endpoint returned response.");
+			}catch(error){
+				log("ERROR",error.message);
+			}
+		});
+
+		document.getElementById("vulnerableCsrfBtn").addEventListener("click",async()=>{
+			const email=document.getElementById("emailInput").value;
+			log("CSRF","Testing vulnerable email change without token...");
+
+			try{
+				const res=await fetch("/vulnerable/change-email",{
+					method:"POST",
+					headers:{
+						"Content-Type":"application/json"
+					},
+					body:JSON.stringify({email:email})
+				});
+
+				const data=await res.json();
+				csrfResponse.textContent=pretty(data);
+				log("WARNING","Vulnerable route changed email without CSRF token.");
+			}catch(error){
+				log("ERROR",error.message);
+			}
+		});
+
+		document.getElementById("getTokenBtn").addEventListener("click",async()=>{
+			log("TOKEN","Requesting CSRF token...");
+
+			try{
+				const res=await fetch("/api/csrf-token");
+				const data=await res.json();
+				csrfToken=data.csrfToken;
+				csrfResponse.textContent=pretty(data);
+				log("SUCCESS","CSRF token received.");
+			}catch(error){
+				log("ERROR",error.message);
+			}
+		});
+
+		document.getElementById("secureCsrfBtn").addEventListener("click",async()=>{
+			const email=document.getElementById("emailInput").value;
+			log("CSRF","Testing secure email change with CSRF token...");
+
+			try{
+				const res=await fetch("/secure/change-email",{
+					method:"POST",
+					headers:{
+						"Content-Type":"application/json",
+						"CSRF-Token":csrfToken
+					},
+					body:JSON.stringify({email:email})
+				});
+
+				const data=await res.json();
+				csrfResponse.textContent=pretty(data);
+
+				if(res.ok){
+					log("SUCCESS","Secure route accepted valid CSRF token.");
+				}else{
+					log("BLOCKED","Secure route blocked request.");
+				}
+			}catch(error){
+				log("ERROR",error.message);
+			}
+		});
+
+		document.getElementById("reconBtn").addEventListener("click",async()=>{
+			log("RECON","Running reconnaissance request...");
+
+			try{
+				const res=await fetch("/recon");
+				const data=await res.json();
+				reconResponse.textContent=pretty(data);
+				log("SUCCESS","Recon data loaded.");
+			}catch(error){
+				log("ERROR",error.message);
+			}
+		});
+
+		document.getElementById("profileBtn").addEventListener("click",async()=>{
+			log("PROFILE","Fetching current session profile...");
+
+			try{
+				const res=await fetch("/api/profile");
+				const data=await res.json();
+				reconResponse.textContent=pretty(data);
+				log("SUCCESS","Profile loaded.");
+			}catch(error){
+				log("ERROR",error.message);
+			}
+		});
+	</script>
+</body>
+</html>
