@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Week 6 Final Deployment Security</title>
+
+	<style nonce="{{NONCE}}">
+		*{
+			margin:0;
+			padding:0;
+			box-sizing:border-box;
+		}
+
+		body{
+			min-height:100vh;
+			font-family:Arial, Helvetica, sans-serif;
+			background:#050816;
+			color:#f8fafc;
+			overflow-x:hidden;
+		}
+
+		.bg{
+			position:fixed;
+			inset:0;
+			background-image:
+				linear-gradient(rgba(56,189,248,0.08) 1px, transparent 1px),
+				linear-gradient(90deg, rgba(56,189,248,0.08) 1px, transparent 1px);
+			background-size:44px 44px;
+			z-index:-3;
+			mask-image:linear-gradient(to bottom, black, transparent);
+		}
+
+		.glow{
+			position:fixed;
+			width:420px;
+			height:420px;
+			border-radius:50%;
+			filter:blur(100px);
+			opacity:0.42;
+			z-index:-2;
+		}
+
+		.g1{
+			background:#2563eb;
+			top:80px;
+			left:-140px;
+		}
+
+		.g2{
+			background:#22c55e;
+			right:-140px;
+			bottom:100px;
+		}
+
+		.topbar{
+			width:min(1200px,92%);
+			margin:30px auto 22px;
+			padding:24px 28px;
+			border-radius:24px;
+			background:rgba(15,23,42,0.78);
+			border:1px solid rgba(148,163,184,0.18);
+			display:flex;
+			justify-content:space-between;
+			gap:20px;
+			align-items:center;
+			box-shadow:0 20px 70px rgba(0,0,0,0.35);
+			backdrop-filter:blur(18px);
+		}
+
+		.topbar h1{
+			font-size:34px;
+			letter-spacing:-1px;
+		}
+
+		.topbar p{
+			color:#94a3b8;
+			margin-top:6px;
+		}
+
+		.badge{
+			padding:12px 18px;
+			border-radius:999px;
+			background:rgba(34,197,94,0.12);
+			border:1px solid rgba(34,197,94,0.35);
+			color:#86efac;
+			font-weight:bold;
+			font-size:13px;
+			white-space:nowrap;
+		}
+
+		.layout{
+			width:min(1200px,92%);
+			margin:0 auto;
+		}
+
+		.hero{
+			padding:34px;
+			border-radius:30px;
+			background:
+				linear-gradient(135deg, rgba(15,23,42,0.96), rgba(30,41,59,0.78)),
+				radial-gradient(circle at top right, rgba(56,189,248,0.3), transparent 35%);
+			border:1px solid rgba(148,163,184,0.2);
+			display:grid;
+			grid-template-columns:1.4fr 0.8fr;
+			gap:24px;
+			box-shadow:0 30px 90px rgba(0,0,0,0.35);
+		}
+
+		.eyebrow{
+			color:#38bdf8;
+			font-size:13px;
+			font-weight:bold;
+			letter-spacing:1.4px;
+			text-transform:uppercase;
+			margin-bottom:14px;
+		}
+
+		.hero h2{
+			font-size:56px;
+			line-height:1;
+			letter-spacing:-2px;
+		}
+
+		.hero p{
+			color:#cbd5e1;
+			line-height:1.8;
+			margin-top:18px;
+			max-width:760px;
+		}
+
+		.score-box{
+			border-radius:26px;
+			background:rgba(2,6,23,0.55);
+			border:1px solid rgba(148,163,184,0.18);
+			padding:28px;
+			display:flex;
+			flex-direction:column;
+			justify-content:center;
+			align-items:center;
+			text-align:center;
+		}
+
+		.score{
+			width:160px;
+			height:160px;
+			border-radius:50%;
+			display:flex;
+			align-items:center;
+			justify-content:center;
+			font-size:42px;
+			font-weight:bold;
+			background:conic-gradient(#22c55e 0 92%, rgba(148,163,184,0.2) 92% 100%);
+			color:white;
+			margin-bottom:18px;
+		}
+
+		.score-box h3{
+			font-size:25px;
+		}
+
+		.score-box p{
+			color:#94a3b8;
+			margin-top:8px;
+		}
+
+		.cards{
+			display:grid;
+			grid-template-columns:repeat(4,1fr);
+			gap:18px;
+			margin-top:22px;
+		}
+
+		.card,.panel,.wide-panel{
+			background:rgba(15,23,42,0.78);
+			border:1px solid rgba(148,163,184,0.18);
+			border-radius:24px;
+			box-shadow:0 20px 60px rgba(0,0,0,0.25);
+			backdrop-filter:blur(18px);
+		}
+
+		.card{
+			padding:22px;
+		}
+
+		.card span{
+			color:#38bdf8;
+			font-weight:bold;
+		}
+
+		.card h3{
+			font-size:22px;
+			margin-top:12px;
+		}
+
+		.card p{
+			color:#94a3b8;
+			line-height:1.6;
+			margin-top:8px;
+			font-size:14px;
+		}
+
+		.dashboard{
+			display:grid;
+			grid-template-columns:repeat(2,1fr);
+			gap:22px;
+			margin-top:22px;
+		}
+
+		.panel,.wide-panel{
+			padding:24px;
+		}
+
+		.panel-header{
+			display:flex;
+			justify-content:space-between;
+			align-items:center;
+			gap:12px;
+			margin-bottom:20px;
+		}
+
+		.panel-header h2{
+			font-size:24px;
+		}
+
+		.panel-header span{
+			font-size:12px;
+			color:#38bdf8;
+			padding:7px 10px;
+			border-radius:999px;
+			background:rgba(56,189,248,0.09);
+			border:1px solid rgba(56,189,248,0.2);
+			white-space:nowrap;
+		}
+
+		button{
+			width:100%;
+			margin-top:14px;
+			padding:13px 18px;
+			border:0;
+			border-radius:14px;
+			background:linear-gradient(135deg,#38bdf8,#2563eb);
+			color:white;
+			font-weight:bold;
+			cursor:pointer;
+			transition:0.2s ease;
+			box-shadow:0 12px 30px rgba(37,99,235,0.25);
+		}
+
+		button:hover{
+			transform:translateY(-2px);
+			box-shadow:0 18px 42px rgba(37,99,235,0.35);
+		}
+
+		input,textarea{
+			width:100%;
+			padding:13px 14px;
+			border-radius:14px;
+			background:#020617;
+			color:#f8fafc;
+			border:1px solid rgba(148,163,184,0.25);
+			outline:none;
+			margin-top:8px;
+		}
+
+		label{
+			display:block;
+			margin-top:14px;
+			color:#cbd5e1;
+			font-size:14px;
+		}
+
+		.response{
+			margin-top:18px;
+			border-radius:16px;
+			overflow:hidden;
+			background:#020617;
+			border:1px solid rgba(148,163,184,0.17);
+		}
+
+		.response p{
+			padding:12px 14px;
+			color:#38bdf8;
+			border-bottom:1px solid rgba(148,163,184,0.15);
+			font-weight:bold;
+			font-size:13px;
+		}
+
+		pre{
+			min-height:160px;
+			padding:14px;
+			color:#cbd5e1;
+			white-space:pre-wrap;
+			word-break:break-word;
+			font-family:Consolas, monospace;
+			font-size:13px;
+			line-height:1.6;
+		}
+
+		.wide-panel{
+			margin-top:22px;
+		}
+
+		.audit-grid{
+			display:grid;
+			grid-template-columns:repeat(3,1fr);
+			gap:16px;
+			margin-top:18px;
+		}
+
+		.audit{
+			padding:18px;
+			border-radius:18px;
+			background:#020617;
+			border:1px solid rgba(148,163,184,0.14);
+		}
+
+		.audit h3{
+			color:#86efac;
+			font-size:17px;
+		}
+
+		.audit p{
+			margin-top:8px;
+			color:#94a3b8;
+			line-height:1.6;
+			font-size:14px;
+		}
+
+		footer{
+			width:min(1200px,92%);
+			text-align:center;
+			color:#64748b;
+			margin:26px auto 34px;
+		}
+
+		@media(max-width:900px){
+			.topbar,.hero{
+				grid-template-columns:1fr;
+				flex-direction:column;
+				align-items:flex-start;
+			}
+
+			.hero h2{
+				font-size:42px;
+			}
+
+			.cards,.dashboard,.audit-grid{
+				grid-template-columns:1fr;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="bg"></div>
+	<div class="glow g1"></div>
+	<div class="glow g2"></div>
+
+	<header class="topbar">
+		<div>
+			<h1>Week 6 Final Deployment Security</h1>
+			<p>Advanced Security Audits, Compliance, Docker Security, Final Penetration Testing</p>
+		</div>
+		<div class="badge">FINAL SECURITY PHASE</div>
+	</header>
+
+	<main class="layout">
+		<section class="hero">
+			<div>
+				<p class="eyebrow">DevelopersHub Internship | Week 6</p>
+				<h2>Audit, Harden, Deploy</h2>
+				<p>
+					This final deployment security dashboard demonstrates secure Express configuration,
+					OWASP Top 10 compliance checks, Docker security readiness, dependency scanning,
+					and final audit preparation using OWASP ZAP, Nikto, Lynis, Burp Suite, and container scanning.
+				</p>
+			</div>
+
+			<div class="score-box">
+				<div class="score">92%</div>
+				<h3>Security Readiness</h3>
+				<p>Final deployment hardening enabled</p>
+			</div>
+		</section>
+
+		<section class="cards">
+			<div class="card">
+				<span>01</span>
+				<h3>ZAP Audit</h3>
+				<p>Automated web vulnerability scanning for web security issues.</p>
+			</div>
+
+			<div class="card">
+				<span>02</span>
+				<h3>Nikto Scan</h3>
+				<p>Web server misconfiguration and header testing.</p>
+			</div>
+
+			<div class="card">
+				<span>03</span>
+				<h3>Lynis Audit</h3>
+				<p>Linux system security auditing and hardening suggestions.</p>
+			</div>
+
+			<div class="card">
+				<span>04</span>
+				<h3>Docker Security</h3>
+				<p>Non-root user, ignored secrets, and image vulnerability scanning.</p>
+			</div>
+		</section>
+
+		<section class="dashboard">
+			<div class="panel">
+				<div class="panel-header">
+					<h2>Security Checklist</h2>
+					<span>OWASP Top 10</span>
+				</div>
+
+				<button id="checklistBtn">Load Security Checklist</button>
+
+				<div class="response">
+					<p>Checklist Response</p>
+					<pre id="checklistOutput">Waiting for security checklist...</pre>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-header">
+					<h2>Safe Input Test</h2>
+					<span>Validation</span>
+				</div>
+
+				<label>Name</label>
+				<input id="nameInput" value="Hamza">
+
+				<label>Message</label>
+				<textarea id="messageInput">This is a safe deployment test message.</textarea>
+
+				<button id="sendBtn">Send Safe Input</button>
+
+				<div class="response">
+					<p>Input Response</p>
+					<pre id="inputOutput">Waiting for input test...</pre>
+				</div>
+			</div>
+		</section>
+
+		<section class="wide-panel">
+			<div class="panel-header">
+				<h2>Week 6 Audit Workflow</h2>
+				<span>Final Deliverables</span>
+			</div>
+
+			<div class="audit-grid">
+				<div class="audit">
+					<h3>1. OWASP ZAP</h3>
+					<p>Run baseline or active scan and export final report.</p>
+				</div>
+
+				<div class="audit">
+					<h3>2. Nikto</h3>
+					<p>Check server headers, exposed files, and web misconfigurations.</p>
+				</div>
+
+				<div class="audit">
+					<h3>3. Lynis</h3>
+					<p>Audit Kali/Linux host for system hardening suggestions.</p>
+				</div>
+
+				<div class="audit">
+					<h3>4. npm audit</h3>
+					<p>Scan dependencies and fix known vulnerable packages.</p>
+				</div>
+
+				<div class="audit">
+					<h3>5. Docker Scan</h3>
+					<p>Build container image and scan it with Trivy.</p>
+				</div>
+
+				<div class="audit">
+					<h3>6. Final Pentest</h3>
+					<p>Use Burp Suite to test headers, inputs, rate limits, and exposed routes.</p>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer>
+		<p>Submitted By: Muhammad Hamza Naseer | DevelopersHub Cybersecurity Internship</p>
+	</footer>
+
+	<script nonce="{{NONCE}}">
+		const checklistBtn=document.getElementById("checklistBtn");
+		const sendBtn=document.getElementById("sendBtn");
+		const checklistOutput=document.getElementById("checklistOutput");
+		const inputOutput=document.getElementById("inputOutput");
+
+		function pretty(data){
+			return JSON.stringify(data,null,2);
+		}
+
+		checklistBtn.addEventListener("click",async()=>{
+			const res=await fetch("/api/security-checklist");
+			const data=await res.json();
+			checklistOutput.textContent=pretty(data);
+		});
+
+		sendBtn.addEventListener("click",async()=>{
+			const name=document.getElementById("nameInput").value;
+			const message=document.getElementById("messageInput").value;
+
+			const res=await fetch("/api/contact",{
+				method:"POST",
+				headers:{
+					"Content-Type":"application/json"
+				},
+				body:JSON.stringify({name,message})
+			});
+
+			const data=await res.json();
+			inputOutput.textContent=pretty(data);
+		});
+	</script>
+</body>
+</html>
